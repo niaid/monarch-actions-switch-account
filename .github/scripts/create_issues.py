@@ -36,6 +36,8 @@ response = requests.post('https://api.github.com/graphql', headers=headers, json
 data = response.json()
 
 alerts = data["data"]["repository"]["vulnerabilityAlerts"]["nodes"]
+created_issues = []
+skipped_issues = []
 
 for alert in alerts:
   package_name = alert["securityVulnerability"]["package"]["name"]
@@ -43,11 +45,16 @@ for alert in alerts:
 
   # Check if an issue already exists
   issue_exists = any(issue.title == package_name for issue in repo.get_issues(state="open"))
-
-  if not issue_exists:
+  if issue_exists:
+    skipped_issues.append(alert.id)
+  else:
     # Create a new issue
     repo.create_issue(
       title=package_name,
       body=description,
       labels=["security"]
     )
+    created_issues.append(alert.id)
+
+print(f"Created issue IDs: {created_issues}")
+print(f"Skipped issue IDs: {skipped_issues}")
