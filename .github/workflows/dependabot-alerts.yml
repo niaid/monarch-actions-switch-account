@@ -25,5 +25,5 @@ jobs:
 
       - name: Create Github issues from Dependabot alerts
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
         run: python .github/scripts/create_issues.py
