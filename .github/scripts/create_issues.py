@@ -1,15 +1,42 @@
 import os
-from github import Github
+import requests
+import json
 
-g = Github(os.getenv("GITHUB_TOKEN"))
-repo = g.get_repo(os.getenv("GITHUB_REPOSITORY"))
+token = os.getenv("GITHUB_TOKEN")
+headers = {"Authorization": f"Bearer {token}"}
 
-alerts = repo.get_security_alerts()
-for alert in alerts:
-    issue_exists = any(issue.title == alert.vulnerable_dependency.package.name for issue in repo.get_issues(state="open"))
-    if not issue_exists:
-        repo.create_issue(
-            title=alert.vulnerable_dependency.package.name,
-            body=f"Version: {alert.vulnerable_dependency.affected_range}\nFixed in: {alert.fixed_in}",
-            labels=["security"]
-        )
+owner, repo = os.getenv("GITHUB_REPOSITORY").split("/")
+
+query = f"""
+{{
+  repository(owner:"{owner}", name:"{repo}") {{
+    vulnerabilityAlerts(first: 100) {{
+      nodes {{
+        id
+        vulnerableManifestPath
+        vulnerableRequirements
+        securityAdvisory {{
+          description
+          references(first: 10) {{
+            nodes {{
+              url
+            }}
+          }}
+          severity
+        }}
+        securityVulnerability {{
+          package {{
+            name
+          }}
+          firstPatchedVersion {{
+            identifier
+          }}
+        }}
+      }}
+    }}
+  }}
+}}
+"""
+
+response = requests.post('https://api.github.com/graphql', headers=headers, json={'query': query})
+print(response.json())
