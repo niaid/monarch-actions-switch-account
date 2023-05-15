@@ -42,13 +42,14 @@ created_issues = []
 skipped_issues = []
 
 for alert in alerts:
+  alert_id = alert["number"]
   package_name = alert["securityVulnerability"]["package"]["name"]
   description = alert["securityVulnerability"]["advisory"]["description"]
 
   # Check if an issue already exists
   issue_exists = any(issue.title == package_name for issue in repo.get_issues(state="open"))
   if issue_exists:
-    skipped_issues.append(alert.number)
+    skipped_issues.append(alert_id)
   else:
     # Create a new issue
     repo.create_issue(
@@ -56,7 +57,7 @@ for alert in alerts:
       body=description,
       labels=["security"]
     )
-    created_issues.append(alert.number)
+    created_issues.append(alert_id)
 
 print(f"Created issue IDs: {created_issues}")
 print(f"Skipped issue IDs: {skipped_issues}")
