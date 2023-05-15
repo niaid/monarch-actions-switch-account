@@ -1,0 +1,29 @@
+name: Dependabot Alerts to Issues
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # run daily
+  workflow_dispatch:
+
+jobs:
+  create_issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip3 install --upgrade pip3
+          pip3 install PyGithub
+
+      - name: Create Github issues from Dependabot alerts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/create_issues.py

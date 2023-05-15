@@ -1,0 +1,32 @@
+name: Github Issues to Trello
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create_cards:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip3 install --upgrade pip3
+          pip3 install py-trello
+
+      - name: Create Trello cards from Github issues
+        env:
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
+          TRELLO_API_SECRET: ${{ secrets.TRELLO_API_SECRET }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
+          TRELLO_TOKEN_SECRET: ${{ secrets.TRELLO_TOKEN_SECRET }}
+
+        run: python3 .github/scripts/create_cards.py
