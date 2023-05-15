@@ -20,10 +20,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip3 install --upgrade pip3
-          pip3 install PyGithub
+          python -m pip install --upgrade pip
+          pip install PyGithub
 
       - name: Create Github issues from Dependabot alerts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/create_issues.py
+        run: python .github/scripts/create_issues.py

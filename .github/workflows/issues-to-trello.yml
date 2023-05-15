@@ -19,8 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python3 -m pip3 install --upgrade pip3
-          pip3 install py-trello
+          python -m pip install --upgrade pip
+          pip install py-trello
 
       - name: Create Trello cards from Github issues
         env:
@@ -29,4 +29,4 @@ jobs:
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
           TRELLO_TOKEN_SECRET: ${{ secrets.TRELLO_TOKEN_SECRET }}
 
-        run: python3 .github/scripts/create_cards.py
+        run: python .github/scripts/create_cards.py
