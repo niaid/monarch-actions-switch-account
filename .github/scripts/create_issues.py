@@ -36,7 +36,6 @@ query = f"""
 
 response = requests.post('https://api.github.com/graphql', headers=headers, json={'query': query})
 data = response.json()
-print(data)
 
 alerts = data["data"]["repository"]["vulnerabilityAlerts"]["nodes"]
 created_issues = []

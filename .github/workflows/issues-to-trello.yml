@@ -24,6 +24,7 @@ jobs:
 
       - name: Create Trello cards from Github issues
         env:
+          TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID }}
           TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
           TRELLO_API_SECRET: ${{ secrets.TRELLO_API_SECRET }}
           TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
