@@ -17,6 +17,7 @@ query = f"""
     vulnerabilityAlerts(first: 100) {{
       nodes {{
         number
+        state
         createdAt
         dismissedAt
         securityVulnerability {{
@@ -43,12 +44,13 @@ skipped_issues = []
 
 for alert in alerts:
   alert_id = alert["number"]
+  state = alert["state"]
   package_name = alert["securityVulnerability"]["package"]["name"]
   description = alert["securityVulnerability"]["advisory"]["description"]
 
   # Check if an issue already exists
   issue_exists = any(issue.title == package_name for issue in repo.get_issues(state="open"))
-  if issue_exists:
+  if issue_exists or state != 'OPEN':
     skipped_issues.append(alert_id)
   else:
     # Create a new issue
