@@ -1,8 +1,10 @@
 import os
 import requests
 import json
+from github import Github
 
 token = os.getenv("REPO_TOKEN")
+g = Github(token)
 headers = {"Authorization": f"Bearer {token}"}
 
 owner, repo_name = os.getenv("GITHUB_REPOSITORY").split("/")
