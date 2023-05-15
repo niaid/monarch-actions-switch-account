@@ -2,7 +2,7 @@ import os
 from github import Github
 
 g = Github(os.getenv("GITHUB_TOKEN"))
-repo = g.get_repo("YOUR_ORG/YOUR_REPO")
+repo = g.get_repo(os.getenv("GITHUB_REPOSITORY"))
 
 alerts = repo.get_security_alerts()
 for alert in alerts:
