@@ -5,11 +5,13 @@ import json
 token = os.getenv("REPO_TOKEN")
 headers = {"Authorization": f"Bearer {token}"}
 
-owner, repo = os.getenv("GITHUB_REPOSITORY").split("/")
+owner, repo_name = os.getenv("GITHUB_REPOSITORY").split("/")
+repo = g.get_repo(f"{owner}/{repo_name}")
+
 
 query = f"""
 {{
-  repository(owner:"{owner}", name:"{repo}") {{
+  repository(owner:"{owner}", name:"{repo_name}") {{
     vulnerabilityAlerts(first: 100) {{
       nodes {{
         createdAt
