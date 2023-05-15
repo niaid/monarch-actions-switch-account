@@ -12,26 +12,16 @@ query = f"""
   repository(owner:"{owner}", name:"{repo}") {{
     vulnerabilityAlerts(first: 100) {{
       nodes {{
-        id
-        vulnerableManifestPath
-        vulnerableRequirements
-        securityAdvisory {{
-          description
-          references(first: 10) {{
-            nodes {{
-              url
+        createdAt
+          dismissedAt
+          securityVulnerability {{
+            package {{
+              name
+            }}
+            advisory {{
+              description
             }}
           }}
-          severity
-        }}
-        securityVulnerability {{
-          package {{
-            name
-          }}
-          firstPatchedVersion {{
-            identifier
-          }}
-        }}
       }}
     }}
   }}
