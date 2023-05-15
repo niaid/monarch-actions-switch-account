@@ -16,16 +16,17 @@ query = f"""
   repository(owner:"{owner}", name:"{repo_name}") {{
     vulnerabilityAlerts(first: 100) {{
       nodes {{
+        number
         createdAt
-          dismissedAt
-          securityVulnerability {{
-            package {{
-              name
-            }}
-            advisory {{
-              description
-            }}
+        dismissedAt
+        securityVulnerability {{
+          package {{
+            name
           }}
+          advisory {{
+            description
+          }}
+        }}
       }}
     }}
   }}
@@ -46,7 +47,7 @@ for alert in alerts:
   # Check if an issue already exists
   issue_exists = any(issue.title == package_name for issue in repo.get_issues(state="open"))
   if issue_exists:
-    skipped_issues.append(alert.id)
+    skipped_issues.append(alert.number)
   else:
     # Create a new issue
     repo.create_issue(
@@ -54,7 +55,7 @@ for alert in alerts:
       body=description,
       labels=["security"]
     )
-    created_issues.append(alert.id)
+    created_issues.append(alert.number)
 
 print(f"Created issue IDs: {created_issues}")
 print(f"Skipped issue IDs: {skipped_issues}")
