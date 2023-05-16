@@ -46,19 +46,22 @@ for alert in alerts:
   state = alert["state"]
   package_name = alert["securityVulnerability"]["package"]["name"]
   description = alert["securityVulnerability"]["advisory"]["description"]
+  
+# Create a title for the issue
+  issue_title = f"Dependabot Alert #{alert_id} - {package_name} is vulnerable"
 
-  # Check if an issue already exists
-  issue_exists = any(issue.title == package_name for issue in repo.get_issues(state="open"))
-  if issue_exists or state != 'OPEN':
-    skipped_issues.append(alert_id)
-  else:
-    # Create a new issue
-    repo.create_issue(
-      title=package_name,
-      body=description,
-      labels=["security"]
-    )
-    created_issues.append(alert_id)
+# Check if an issue already exists
+issue_exists = any(issue.title == issue_title for issue in repo.get_issues(state="open"))
+if issue_exists or state != 'OPEN':
+  skipped_issues.append(alert_id)
+else:
+  # Create a new issue
+  repo.create_issue(
+    title=issue_title,
+    body=description,
+    labels=["security"]
+  )
+  created_issues.append(alert_id)
 
 print(f"Created issue IDs: {created_issues}")
 print(f"Skipped issue IDs: {skipped_issues}")
