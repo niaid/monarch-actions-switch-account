@@ -6,7 +6,7 @@ on:
 
 jobs:
   issues-to-trello:
-    uses: niaid/trellaction-workflow/.github/workflows/issues-to-trello.yml@main
+    uses: niaid/trellaction-workflow/.github/workflows/issues-to-trello.yaml@main
     with: 
       trello_list_index: 1
     secrets:

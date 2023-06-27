@@ -7,6 +7,6 @@ on:
 
 jobs:
   alerts-to-issues:
-    uses: niaid/trellaction-workflow/.github/workflows/alerts-to-issues.yml@main
+    uses: niaid/trellaction-workflow/.github/workflows/alerts-to-issues.yaml@main
     secrets:
       repo_token: ${{ secrets.REPO_TOKEN }}
