@@ -6,24 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  create_issues:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install PyGithub
-
-      - name: Create Github issues from Dependabot alerts
-        env:
-          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
-        run: python .github/scripts/create_issues.py
+  alerts-to-issues:
+    uses: niaid/trellaction-workflow/.github/workflows/alerts-to-issues.yml@main
+    secrets:
+      repo_token: ${{ secrets.REPO_TOKEN }}

@@ -5,29 +5,13 @@ on:
     types: [opened]
 
 jobs:
-  create_cards:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install py-trello
-
-      - name: Create Trello cards from Github issues
-        env:
-          TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID }}
-          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
-          TRELLO_API_SECRET: ${{ secrets.TRELLO_API_SECRET }}
-          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
-          TRELLO_TOKEN_SECRET: ${{ secrets.TRELLO_TOKEN_SECRET }}
-
-        run: python .github/scripts/create_cards.py
+  issues-to-trello:
+    uses: niaid/trellaction-workflow/.github/workflows/issues-to-trello.yml@main
+    with: 
+      trello_list_index: 1
+    secrets:
+      trello_board_id: ${{ secrets.TRELLO_BOARD_ID }}
+      trello_api_key: ${{ secrets.TRELLO_API_KEY }}
+      trello_api_secret: ${{ secrets.TRELLO_API_SECRET }}
+      trello_token: ${{ secrets.TRELLO_TOKEN }}
+      trello_token_secret: ${{ secrets.TRELLO_TOKEN_SECRET }}
