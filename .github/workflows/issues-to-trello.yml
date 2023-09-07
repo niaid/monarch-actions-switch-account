@@ -8,7 +8,7 @@ jobs:
   issues-to-trello:
     uses: niaid/trellaction-workflow/.github/workflows/issues-to-trello.yaml@dev
     with: 
-      trello_list_index: 1
+      trello_list_name: Backlog-target
     secrets:
       trello_board_id: ${{ secrets.TRELLO_BOARD_ID }}
       trello_api_key: ${{ secrets.TRELLO_API_KEY }}
