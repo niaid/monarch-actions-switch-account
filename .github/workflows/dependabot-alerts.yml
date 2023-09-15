@@ -7,9 +7,10 @@ on:
 
 jobs:
   alerts-to-issues:
-    uses: niaid/trellaction-workflow/.github/workflows/alerts-to-issues.yaml@main
+    uses: niaid/trellaction-workflow/.github/workflows/alerts-to-issues.yaml@dev
     with:
       custom_labels: "Scope: Security,O&M Task"
       priority_prefix: "Priority:"
+      branch_name: dev
     secrets:
       repo_token: ${{ secrets.REPO_TOKEN }}
