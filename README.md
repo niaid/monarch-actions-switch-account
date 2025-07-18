@@ -1,14 +1,59 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# Monarch Actions Switch Account
 
-# Create a JavaScript Action using TypeScript
+A GitHub Action that switches AWS credentials to enable authentication between different Monarch Spaces accounts. This action assumes IAM roles in target accounts and exports the credentials as environment variables for use in subsequent workflow steps.
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+## Usage
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
+```yaml
+- name: Switch to target account
+  uses: niaid/monarch-actions-switch-account@v1
+  with:
+    account: 'prod'  # Must be one of: dev, qa, stage, prod, mgmt
+```
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+The action will:
+1. Look up the AWS account ID from SSM Parameter Store at `/monarch-ro/space-accounts/{account}`
+2. Assume the `cicd-runner-admin` role in the target account
+3. Export AWS credentials as environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`, `AWS_REGION`)
+
+### Requirements
+
+- The workflow must have permission to access SSM Parameter Store in the source account
+- The target account must have a `cicd-runner-admin` role that trusts the source account
+- The account name must be one of: `dev`, `qa`, `stage`, `prod`, or `mgmt`
+- The account name must exist as a parameter in SSM at `/monarch-ro/space-accounts/{account}`
+
+### Example Workflow
+
+```yaml
+name: Deploy to Monarch Space
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Switch to production account
+      uses: niaid/monarch-actions-switch-account@v1
+      with:
+        account: 'prod'
+    
+    - name: Deploy application
+      run: |
+        # Your deployment commands here
+        # AWS CLI will automatically use the switched credentials
+        aws s3 ls
+```
+
+---
+
+## Development
+
+This is a TypeScript GitHub Action built with the GitHub Actions toolkit.
 
 ## Create an action from this template
 
