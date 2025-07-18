@@ -1,6 +1,6 @@
 {
   "name": "monarch-actions-switch-account",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "private": true,
   "description": "TypeScript template action",
   "main": "lib/main.js",
@@ -11,6 +11,7 @@
     "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
@@ -26,12 +27,18 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.6.0",
-    "aws-sdk": "^2.1103.0"
+    "@aws-sdk/client-sts": "^3.0.0",
+    "@aws-sdk/client-ssm": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.19.45",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^22.0.0",
+    "@aws-sdk/types": "^3.0.0",
     "@typescript-eslint/parser": "^8.2.0",
-    "@vercel/ncc": "^0.33.3",
+    "@vercel/ncc": "^0.38.0",
     "eslint": "^8.57.0",
     "eslint-plugin-github": "^5.0.1",
     "eslint-plugin-jest": "^28.8.0",

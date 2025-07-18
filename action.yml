@@ -4,7 +4,7 @@ author: 'niaid'
 inputs:
   account: 
     required: true
-    description: 'Monarch Spaces account to switch to'
+    description: 'Monarch Spaces account to switch to (dev, qa, stage, prod, mgmt)'
 runs:
-  using: 'node12'
+  using: 'node20'
   main: 'dist/index.js'

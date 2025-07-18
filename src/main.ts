@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
-import aws from 'aws-sdk'
+import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts'
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm'
 import assert from 'assert'
 
 // The max time that a GitHub action is allowed to run is 6 hours.
@@ -12,10 +13,11 @@ const SANITIZATION_CHARACTER = '_';
 const ROLE_SESSION_NAME = 'GitHubActions';
 const REGION_REGEX = /^[a-z0-9-]+$/g;
 const DEFAULT_REGION = 'us-east-1';
+export const ALLOWED_ACCOUNTS = ['dev', 'qa', 'stage', 'prod', 'mgmt'];
 
 
 
-async function switchAccount(accountName: string) {
+export async function switchAccount(accountName: string) {
   // Get inputs
   const accessKeyId = core.getInput('aws-access-key-id', { required: false });
   const secretAccessKey = core.getInput('aws-secret-access-key', { required: false });
@@ -35,21 +37,25 @@ async function switchAccount(accountName: string) {
     "Missing required input for account to switch to."
   );
 
+  assert(
+    ALLOWED_ACCOUNTS.includes(accountName),
+    `Invalid account name '${accountName}'. Must be one of: ${ALLOWED_ACCOUNTS.join(', ')}`
+  );
+
   // Do the actual work 
   const accountId = await getAccountIdViaSsm(accountName);
   const accountSession = await assumeAccountRole(accountId);
   exportCredentials(accountSession);
 }
 
-async function createAwsSession() {
-  return new aws.STS({
+export async function createAwsSession() {
+  return new STSClient({
     region: DEFAULT_REGION,
-    stsRegionalEndpoints: 'regional',
     customUserAgent: USER_AGENT
   });
 }
 
-async function clearAssumedRole() {
+export async function clearAssumedRole() {
   const emptyCreds = {
     AccessKeyId: '',
     SecretAccessKey: '',
@@ -58,19 +64,12 @@ async function clearAssumedRole() {
 
   exportCredentials(emptyCreds);
 
-  aws.config.credentials = null;
-
-  return new Promise((resolve, reject) => {
-    aws.config.getCredentials((err) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(aws.config.credentials);
-    })
-  });
+  // AWS SDK v3 doesn't have global config like v2
+  // Return empty credentials to indicate cleared state
+  return emptyCreds;
 }
 
-async function assumeAccountRole(accountId: any){
+export async function assumeAccountRole(accountId: any){
   const origCreds = await clearAssumedRole();
 
   const sts = await createAwsSession();
@@ -81,7 +80,8 @@ async function assumeAccountRole(accountId: any){
     DurationSeconds: 900
   }
 
-  const { Credentials } = await sts.assumeRole(roleToAssume).promise();
+  const command = new AssumeRoleCommand(roleToAssume);
+  const { Credentials } = await sts.send(command);
   if (!Credentials) {
     throw new Error('no credentials returned');
   }
@@ -89,17 +89,18 @@ async function assumeAccountRole(accountId: any){
   return Credentials
 }
 
-async function getAccountIdViaSsm(accountName:string){
-  const ssm = new aws.SSM({
+export async function getAccountIdViaSsm(accountName:string){
+  const ssm = new SSMClient({
     region: DEFAULT_REGION
   });
   const paramName = `/monarch-ro/space-accounts/${accountName}`
 
   try {
-    const accountIdParam = await ssm.getParameter({
+    const command = new GetParameterCommand({
       Name: paramName,
       WithDecryption: true,
-    }).promise();
+    });
+    const accountIdParam = await ssm.send(command);
     if (accountIdParam.Parameter){
       let accountId = accountIdParam.Parameter.Value
       return accountId;
@@ -109,7 +110,7 @@ async function getAccountIdViaSsm(accountName:string){
   }  
 }
 
-function exportCredentials(params:any) {
+export function exportCredentials(params:any) {
   // Configure the AWS CLI and AWS SDKs using environment variables and set them as secrets.
   // Setting the credentials as secrets masks them in Github Actions logs
 
