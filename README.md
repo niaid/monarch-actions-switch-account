@@ -6,7 +6,7 @@ A GitHub Action that switches AWS credentials to enable authentication between d
 
 ```yaml
 - name: Switch to target account
-  uses: niaid/monarch-actions-switch-account@v1
+  uses: niaid/monarch-actions-switch-account@v2
   with:
     account: 'prod'  # Must be one of: dev, qa, stage, prod, mgmt
 ```
@@ -38,7 +38,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Switch to production account
-      uses: niaid/monarch-actions-switch-account@v1
+      uses: niaid/monarch-actions-switch-account@v2
       with:
         account: 'prod'
     
@@ -124,7 +124,7 @@ Then run [ncc](https://github.com/zeit/ncc) and push the results:
 $ npm run package
 $ git add dist
 $ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
+$ git push origin releases/v2
 ```
 
 Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
@@ -147,4 +147,4 @@ See the [actions tab](https://github.com/actions/typescript-action/actions) for 
 
 ## Usage:
 
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
+After testing you can [create a v2 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest v2 action
