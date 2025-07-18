@@ -22,13 +22,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -53,36 +63,18 @@ const core = __importStar(__nccwpck_require__(7484));
 const client_sts_1 = __nccwpck_require__(1695);
 const client_ssm_1 = __nccwpck_require__(4736);
 const assert_1 = __importDefault(__nccwpck_require__(2613));
-// The max time that a GitHub action is allowed to run is 6 hours.
-// That seems like a reasonable default to use if no role duration is defined.
-const MAX_ACTION_RUNTIME = 6 * 3600;
-const DEFAULT_ROLE_DURATION_FOR_OIDC_ROLES = 3600;
 const USER_AGENT = 'configure-aws-credentials-for-github-actions';
-const MAX_TAG_VALUE_LENGTH = 256;
-const SANITIZATION_CHARACTER = '_';
-const ROLE_SESSION_NAME = 'GitHubActions';
-const REGION_REGEX = /^[a-z0-9-]+$/g;
 const DEFAULT_REGION = 'us-east-1';
 exports.ALLOWED_ACCOUNTS = ['dev', 'qa', 'stage', 'prod', 'mgmt'];
 function switchAccount(accountName) {
     return __awaiter(this, void 0, void 0, function* () {
-        // Get inputs
-        const accessKeyId = core.getInput('aws-access-key-id', { required: false });
-        const secretAccessKey = core.getInput('aws-secret-access-key', { required: false });
-        const region = core.getInput('aws-region', { required: false });
-        const sessionToken = core.getInput('aws-session-token', { required: false });
-        const maskAccountId = core.getInput('mask-aws-account-id', { required: false });
-        const roleToAssume = core.getInput('role-to-assume', { required: false });
-        const roleExternalId = core.getInput('role-external-id', { required: false });
-        let roleDurationSeconds = core.getInput('role-duration-seconds', { required: false }) || MAX_ACTION_RUNTIME;
-        const roleSessionName = core.getInput('role-session-name', { required: false }) || ROLE_SESSION_NAME;
-        const roleSkipSessionTaggingInput = core.getInput('role-skip-session-tagging', { required: false }) || 'false';
-        const roleSkipSessionTagging = roleSkipSessionTaggingInput.toLowerCase() === 'true';
-        const webIdentityTokenFile = core.getInput('web-identity-token-file', { required: false });
-        (0, assert_1.default)(accountName, "Missing required input for account to switch to.");
+        (0, assert_1.default)(accountName, 'Missing required input for account to switch to.');
         (0, assert_1.default)(exports.ALLOWED_ACCOUNTS.includes(accountName), `Invalid account name '${accountName}'. Must be one of: ${exports.ALLOWED_ACCOUNTS.join(', ')}`);
-        // Do the actual work 
+        // Do the actual work
         const accountId = yield getAccountIdViaSsm(accountName);
+        if (!accountId) {
+            throw new Error(`Could not retrieve account ID for ${accountName}`);
+        }
         const accountSession = yield assumeAccountRole(accountId);
         exportCredentials(accountSession);
     });
@@ -110,7 +102,7 @@ function clearAssumedRole() {
 }
 function assumeAccountRole(accountId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const origCreds = yield clearAssumedRole();
+        yield clearAssumedRole();
         const sts = yield createAwsSession();
         const roleToAssume = {
             RoleArn: `arn:aws:iam::${accountId}:role/cicd-runner-admin`,
@@ -134,11 +126,11 @@ function getAccountIdViaSsm(accountName) {
         try {
             const command = new client_ssm_1.GetParameterCommand({
                 Name: paramName,
-                WithDecryption: true,
+                WithDecryption: true
             });
             const accountIdParam = yield ssm.send(command);
             if (accountIdParam.Parameter) {
-                let accountId = accountIdParam.Parameter.Value;
+                const accountId = accountIdParam.Parameter.Value;
                 return accountId;
             }
         }

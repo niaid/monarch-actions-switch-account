@@ -1,12 +1,22 @@
 import {expect, test, jest, describe, beforeEach} from '@jest/globals'
-import { switchAccount, getAccountIdViaSsm, assumeAccountRole, ALLOWED_ACCOUNTS, exportCredentials } from '../src/main'
-import type { GetParameterCommandOutput } from '@aws-sdk/client-ssm'
-import type { AssumeRoleCommandOutput } from '@aws-sdk/client-sts'
+import {
+  switchAccount,
+  getAccountIdViaSsm,
+  assumeAccountRole,
+  ALLOWED_ACCOUNTS,
+  exportCredentials
+} from '../src/main'
+import type {GetParameterCommandOutput} from '@aws-sdk/client-ssm'
+import type {AssumeRoleCommandOutput} from '@aws-sdk/client-sts'
 import * as core from '@actions/core'
 
 // Mock AWS SDK v3
-const mockSTSSend = jest.fn() as jest.MockedFunction<(command: any) => Promise<AssumeRoleCommandOutput>>
-const mockSSMSend = jest.fn() as jest.MockedFunction<(command: any) => Promise<GetParameterCommandOutput>>
+const mockSTSSend = jest.fn() as jest.MockedFunction<
+  (command: any) => Promise<AssumeRoleCommandOutput>
+>
+const mockSSMSend = jest.fn() as jest.MockedFunction<
+  (command: any) => Promise<GetParameterCommandOutput>
+>
 
 jest.mock('@aws-sdk/client-sts', () => ({
   STSClient: jest.fn().mockImplementation(() => ({
@@ -38,7 +48,9 @@ describe('switchAccount', () => {
   })
 
   test('validates account name', async () => {
-    await expect(switchAccount('invalid')).rejects.toThrow('Invalid account name')
+    await expect(switchAccount('invalid')).rejects.toThrow(
+      'Invalid account name'
+    )
   })
 
   test('accepts valid account names', () => {
@@ -52,7 +64,7 @@ describe('switchAccount', () => {
   test('successfully switches account', async () => {
     // Mock SSM response
     mockSSMSend.mockResolvedValue({
-      Parameter: { Value: '123456789012' }
+      Parameter: {Value: '123456789012'}
     } as GetParameterCommandOutput)
 
     // Mock STS response
@@ -69,11 +81,23 @@ describe('switchAccount', () => {
 
     expect(mockSSMSend).toHaveBeenCalled()
     expect(mockSTSSend).toHaveBeenCalled()
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_DEFAULT_REGION', 'us-east-1')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_DEFAULT_REGION',
+      'us-east-1'
+    )
     expect(core.exportVariable).toHaveBeenCalledWith('AWS_REGION', 'us-east-1')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_ACCESS_KEY_ID', 'AKIATEST')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_SECRET_ACCESS_KEY', 'secret')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_SESSION_TOKEN', 'token')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_ACCESS_KEY_ID',
+      'AKIATEST'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_SECRET_ACCESS_KEY',
+      'secret'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_SESSION_TOKEN',
+      'token'
+    )
     expect(core.setSecret).toHaveBeenCalledWith('AKIATEST')
     expect(core.setSecret).toHaveBeenCalledWith('secret')
     expect(core.setSecret).toHaveBeenCalledWith('token')
@@ -83,7 +107,7 @@ describe('switchAccount', () => {
 describe('getAccountIdViaSsm', () => {
   test('retrieves account ID from SSM', async () => {
     mockSSMSend.mockResolvedValue({
-      Parameter: { Value: '123456789012' }
+      Parameter: {Value: '123456789012'}
     } as GetParameterCommandOutput)
 
     const result = await getAccountIdViaSsm('dev')
@@ -117,7 +141,7 @@ describe('assumeAccountRole', () => {
       SecretAccessKey: 'secret',
       SessionToken: 'token'
     }
-    
+
     mockSTSSend.mockResolvedValue({
       Credentials: mockCredentials
     } as AssumeRoleCommandOutput)
@@ -132,7 +156,9 @@ describe('assumeAccountRole', () => {
       Credentials: undefined
     } as AssumeRoleCommandOutput)
 
-    await expect(assumeAccountRole('123456789012')).rejects.toThrow('no credentials returned')
+    await expect(assumeAccountRole('123456789012')).rejects.toThrow(
+      'no credentials returned'
+    )
   })
 })
 
@@ -152,11 +178,23 @@ describe('exportCredentials', () => {
 
     exportCredentials(params)
 
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_DEFAULT_REGION', 'us-east-1')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_DEFAULT_REGION',
+      'us-east-1'
+    )
     expect(core.exportVariable).toHaveBeenCalledWith('AWS_REGION', 'us-east-1')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_ACCESS_KEY_ID', 'AKIATEST')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_SECRET_ACCESS_KEY', 'secret')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_SESSION_TOKEN', 'token')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_ACCESS_KEY_ID',
+      'AKIATEST'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_SECRET_ACCESS_KEY',
+      'secret'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_SESSION_TOKEN',
+      'token'
+    )
     expect(core.setSecret).toHaveBeenCalledWith('AKIATEST')
     expect(core.setSecret).toHaveBeenCalledWith('secret')
     expect(core.setSecret).toHaveBeenCalledWith('token')
@@ -170,8 +208,14 @@ describe('exportCredentials', () => {
 
     exportCredentials(params)
 
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_ACCESS_KEY_ID', 'AKIATEST')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_SECRET_ACCESS_KEY', 'secret')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_ACCESS_KEY_ID',
+      'AKIATEST'
+    )
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_SECRET_ACCESS_KEY',
+      'secret'
+    )
     expect(core.setSecret).toHaveBeenCalledWith('AKIATEST')
     expect(core.setSecret).toHaveBeenCalledWith('secret')
     expect(core.setSecret).not.toHaveBeenCalledWith(undefined)
@@ -179,7 +223,7 @@ describe('exportCredentials', () => {
 
   test('clears session token when previous one exists', () => {
     process.env.AWS_SESSION_TOKEN = 'previous-token'
-    
+
     const params = {
       AccessKeyId: 'AKIATEST',
       SecretAccessKey: 'secret'
@@ -200,8 +244,10 @@ describe('exportCredentials', () => {
     exportCredentials(params)
 
     expect(core.exportVariable).toHaveBeenCalledWith('AWS_ACCESS_KEY_ID', '')
-    expect(core.exportVariable).toHaveBeenCalledWith('AWS_SECRET_ACCESS_KEY', '')
+    expect(core.exportVariable).toHaveBeenCalledWith(
+      'AWS_SECRET_ACCESS_KEY',
+      ''
+    )
     expect(core.setSecret).not.toHaveBeenCalled()
   })
 })
-
