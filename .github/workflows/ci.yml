@@ -28,6 +28,9 @@ jobs:
     - name: Check formatting
       run: npm run format-check
     
+    - name: Clean dist folder
+      run: rm -rf dist
+    
     - name: Build TypeScript
       run: npm run build
     
