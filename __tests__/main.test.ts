@@ -218,7 +218,7 @@ describe('exportCredentials', () => {
     )
     expect(core.setSecret).toHaveBeenCalledWith('AKIATEST')
     expect(core.setSecret).toHaveBeenCalledWith('secret')
-    expect(core.setSecret).not.toHaveBeenCalledWith(undefined)
+    expect(core.setSecret).not.toHaveBeenCalledWith(undefined as unknown as string)
   })
 
   test('clears session token when previous one exists', () => {
